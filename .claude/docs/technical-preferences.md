@@ -5,44 +5,44 @@
 
 ## Engine & Language
 
-- **Engine**: [TO BE CONFIGURED — run /setup-engine]
-- **Language**: [TO BE CONFIGURED]
-- **Rendering**: [TO BE CONFIGURED]
-- **Physics**: [TO BE CONFIGURED]
+- **Engine**: Godot 4.6
+- **Language**: GDScript
+- **Rendering**: Godot Rendering Server (Forward+/Mobile backend)
+- **Physics**: Jolt Physics (default en Godot 4.6)
 
 ## Input & Platform
 
 <!-- Written by /setup-engine. Read by /ux-design, /ux-review, /test-setup, /team-ui, and /dev-story -->
 <!-- to scope interaction specs, test helpers, and implementation to the correct input methods. -->
 
-- **Target Platforms**: [TO BE CONFIGURED — e.g., PC, Console, Mobile, Web]
-- **Input Methods**: [TO BE CONFIGURED — e.g., Keyboard/Mouse, Gamepad, Touch, Mixed]
-- **Primary Input**: [TO BE CONFIGURED — the dominant input for this game]
-- **Gamepad Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Touch Support**: [TO BE CONFIGURED — Full / Partial / None]
-- **Platform Notes**: [TO BE CONFIGURED — any platform-specific UX constraints]
+- **Target Platforms**: PC (Steam), Web (itch.io HTML5)
+- **Input Methods**: Keyboard/Mouse (primario), Gamepad (opcional)
+- **Primary Input**: Keyboard/Mouse — juego de cartas, click-driven
+- **Gamepad Support**: Partial — navegación de menús recomendada, no requerida
+- **Touch Support**: Partial — web puede ser accedido desde tablet
+- **Platform Notes**: UI debe funcionar sin hover-only interactions. Export web debe apuntar a < 5MB para carga rápida en itch.io. No assumptions de resolución fija.
 
 ## Naming Conventions
 
-- **Classes**: [TO BE CONFIGURED]
-- **Variables**: [TO BE CONFIGURED]
-- **Signals/Events**: [TO BE CONFIGURED]
-- **Files**: [TO BE CONFIGURED]
-- **Scenes/Prefabs**: [TO BE CONFIGURED]
-- **Constants**: [TO BE CONFIGURED]
+- **Classes**: PascalCase (e.g. `PlayerController`)
+- **Variables**: snake_case (e.g. `move_speed`, `current_health`)
+- **Signals/Events**: snake_case pasado (e.g. `health_changed`, `card_played`)
+- **Files**: snake_case matching clase (e.g. `player_controller.gd`)
+- **Scenes/Prefabs**: PascalCase matching nodo raíz (e.g. `PlayerController.tscn`)
+- **Constants**: UPPER_SNAKE_CASE (e.g. `MAX_HEALTH`, `DEFAULT_IMPULSO`)
 
 ## Performance Budgets
 
-- **Target Framerate**: [TO BE CONFIGURED]
-- **Frame Budget**: [TO BE CONFIGURED]
-- **Draw Calls**: [TO BE CONFIGURED]
-- **Memory Ceiling**: [TO BE CONFIGURED]
+- **Target Framerate**: 60 fps
+- **Frame Budget**: 16.6 ms
+- **Draw Calls**: ~500 (2D, Godot Forward+/Mobile backend)
+- **Memory Ceiling**: 512 MB RAM (objetivo para itch.io web)
 
 ## Testing
 
-- **Framework**: [TO BE CONFIGURED]
-- **Minimum Coverage**: [TO BE CONFIGURED]
-- **Required Tests**: Balance formulas, gameplay systems, networking (if applicable)
+- **Framework**: GUT (Godot Unit Test) — instalable como addon desde Asset Library
+- **Minimum Coverage**: Sistemas de lógica de juego (fórmulas, máquinas de estado, efectos de cartas)
+- **Required Tests**: Fórmulas de balance, sistema de Situaciones, lógica de deck building
 
 ## Forbidden Patterns
 
@@ -51,8 +51,8 @@
 
 ## Allowed Libraries / Addons
 
-<!-- Add approved third-party dependencies here -->
-- [None configured yet — add as dependencies are approved]
+<!-- Add approved third-party dependencies here. Only add when actively integrating. -->
+- GUT (Godot Unit Test) — testing framework
 
 ## Architecture Decisions Log
 
@@ -65,23 +65,22 @@
 <!-- Read by /code-review, /architecture-decision, /architecture-review, and team skills -->
 <!-- to know which specialist to spawn for engine-specific validation. -->
 
-- **Primary**: [TO BE CONFIGURED — run /setup-engine]
-- **Language/Code Specialist**: [TO BE CONFIGURED]
-- **Shader Specialist**: [TO BE CONFIGURED]
-- **UI Specialist**: [TO BE CONFIGURED]
-- **Additional Specialists**: [TO BE CONFIGURED]
-- **Routing Notes**: [TO BE CONFIGURED]
+- **Primary**: godot-specialist
+- **Language/Code Specialist**: godot-gdscript-specialist (todos los archivos .gd)
+- **Shader Specialist**: godot-shader-specialist (archivos .gdshader, VisualShader resources)
+- **UI Specialist**: godot-specialist (sin especialista dedicado de UI — primary cubre todo)
+- **Additional Specialists**: godot-gdextension-specialist (GDExtension / bindings nativos C++ solo cuando se necesiten)
+- **Routing Notes**: Invocar primary para decisiones de arquitectura, validación de ADRs y code review cross-cutting. Invocar GDScript specialist para calidad de código, arquitectura de señales, static typing y GDScript idioms. Invocar shader specialist para materiales y shaders. Invocar GDExtension specialist solo cuando haya extensiones nativas.
 
 ### File Extension Routing
 
 <!-- Skills use this table to select the right specialist per file type. -->
-<!-- If a row says [TO BE CONFIGURED], fall back to Primary for that file type. -->
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (primary language) | [TO BE CONFIGURED] |
-| Shader / material files | [TO BE CONFIGURED] |
-| UI / screen files | [TO BE CONFIGURED] |
-| Scene / prefab / level files | [TO BE CONFIGURED] |
-| Native extension / plugin files | [TO BE CONFIGURED] |
-| General architecture review | Primary |
+| Game code (.gd files) | godot-gdscript-specialist |
+| Shader / material files (.gdshader, VisualShader) | godot-shader-specialist |
+| UI / screen files (Control nodes, CanvasLayer) | godot-specialist |
+| Scene / prefab / level files (.tscn, .tres) | godot-specialist |
+| Native extension / plugin files (.gdextension, C++) | godot-gdextension-specialist |
+| General architecture review | godot-specialist |

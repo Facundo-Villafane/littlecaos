@@ -1,0 +1,42 @@
+name: Sync GDDs to Docusaurus
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'design/gdd/**'
+
+jobs:
+  sync:
+    name: Sync GDDs al sitio
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo del juego
+        uses: actions/checkout@v4
+
+      - name: Checkout repo del sitio
+        uses: actions/checkout@v4
+        with:
+          repository: Facundo-Villafane/littlecaos
+          token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+          path: littlecaos
+
+      - name: Copiar GDDs
+        run: |
+          mkdir -p littlecaos/docs/gdd
+          cp design/gdd/*.md littlecaos/docs/gdd/
+
+      - name: Commit y push
+        run: |
+          cd littlecaos
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/gdd/
+          if git diff --staged --quiet; then
+            echo "Sin cambios — nada que publicar."
+          else
+            git commit -m "docs: sync GDDs desde repo del juego (${{ github.sha }})"
+            git push
+          fi

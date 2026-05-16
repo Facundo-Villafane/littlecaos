@@ -1,6 +1,6 @@
 # Godot — Current Best Practices
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-05-13 | Engine: Godot 4.6
 
 Practices that are **new or changed** since the model's training data (~4.3).
 This supplements (not replaces) the agent's built-in knowledge.
@@ -92,6 +92,56 @@ This supplements (not replaces) the agent's built-in knowledge.
 - Export variable auto-generation: drag resource from FileSystem into script editor
 - Live preview in Quick Open dialog when "Live Preview" enabled
 - New "Select Mode" (v key) prevents accidental transforms; old mode renamed "Transform Mode" (q key)
+
+## GDScript Patterns — Caos en Mano Específicos
+
+### Typed Dictionaries para sistemas de cartas (4.4+)
+
+```gdscript
+# situation_data.gd — efectos por tipo de carta
+var card_type_modifiers: Dictionary[StringName, float] = {
+    &"attack": 1.0,
+    &"social": 2.0,   # Situación potencia cartas sociales
+    &"chaos": 0.5,
+}
+
+# hand.gd — mano de cartas indexada por slot
+var cards_in_hand: Dictionary[int, CardData] = {}
+```
+
+### @abstract para base de cartas (4.5+)
+
+```gdscript
+# base_card.gd
+@abstract class_name BaseCard extends Resource:
+    @export var card_name: StringName
+    @export var impulso_cost: int = 1
+
+    @abstract func apply(state: GameState) -> void
+    @abstract func get_description() -> String
+```
+
+### StringName constants para animaciones y grupos
+
+```gdscript
+# card_view.gd
+const ANIM_PLAY   := &"card_play"
+const ANIM_DRAW   := &"card_draw"
+const ANIM_DISCARD := &"card_discard"
+const GROUP_CARDS := &"cards"
+
+func play_animation(anim: StringName) -> void:
+    anim_player.play(anim)  # StringName, nunca String literal
+```
+
+### Resource.duplicate_deep para cartas runtime (4.5+)
+
+```gdscript
+# deck.gd — clonar CardData para que cada instancia tenga su estado propio
+func draw_card() -> CardData:
+    var template: CardData = card_templates[randi() % card_templates.size()]
+    return template.duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
+```
 
 ## Tooling
 

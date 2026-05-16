@@ -1,3 +1,6 @@
+# === Docusaurus docs site (separate git repo → littlecaos) ===
+website/
+
 # === IDE and Editor ===
 .vs/
 .vscode/settings.json
