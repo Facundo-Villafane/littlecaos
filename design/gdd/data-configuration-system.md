@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Sistema de Configuración de Datos
-description: Esquema de datos y pipeline de carga para cartas, Situaciones, enemigos y reliquias. Fundación data-driven del juego.
+description: Esquema de datos y pipeline de carga para cartas, Situaciones, enemigos, reliquias y aliados. Fundación data-driven del juego.
 ---
 
 # Data Configuration System
@@ -14,7 +14,7 @@ description: Esquema de datos y pipeline de carga para cartas, Situaciones, enem
 
 ## Summary
 
-El Data Configuration System define el esquema y el pipeline de carga para todo el contenido del juego: cartas, Situaciones, enemigos y reliquias. Es la infraestructura que hace que Caos en Mano sea data-driven — el contenido nuevo se agrega creando archivos de datos, no escribiendo código. Todos los demás sistemas leen su contenido a través de la interfaz de acceso de este sistema.
+El Data Configuration System define el esquema y el pipeline de carga para todo el contenido del juego: cartas, Situaciones, enemigos, reliquias y aliados. Es la infraestructura que hace que Caos en Mano sea data-driven — el contenido nuevo se agrega creando archivos de datos, no escribiendo código. Todos los demás sistemas leen su contenido a través de la interfaz de acceso de este sistema.
 
 > **Quick reference** — Layer: `Foundation` · Priority: `MVP` · Key deps: `None`
 
@@ -47,6 +47,8 @@ res://
     │   └── enemies.json        # Array de todos los enemigos
     ├── relics/
     │   └── relics.json         # Array de todas las reliquias
+    ├── allies/
+    │   └── allies.json         # Array de todos los aliados invocables
     └── config/
         └── registries.json     # Tipos de carta, status IDs, tags conocidos
 ```
@@ -128,6 +130,23 @@ Sub-esquema de intención:
 
 ---
 
+**Aliado (`AllyData`)** *(agregado en retrofit 2026-05-17 — requerido por Card System GDD)*
+
+Los aliados son entidades persistentes invocadas al campo por cartas de tipo `summon_ally`. Su ciclo de vida es gestionado por el Combat System. El `AllyData` define sus stats base (inmutables).
+
+| Campo | Tipo | Req | Valores válidos | Descripción |
+|---|---|---|---|---|
+| `id` | string | ✓ | snake_case único | Clave primaria — referenciada por el efecto `summon_ally` en cartas |
+| `name` | string | ✓ | — | Nombre mostrado en el campo |
+| `hp` | int | ✓ | 1–999 | HP base del aliado. El Combat System crea una instancia de runtime con este valor |
+| `attack_per_turn` | int | ✓ | 0–99 | Daño fijo que inflige al enemigo automáticamente cada turno |
+| `flavor_text` | string | — | — | Texto narrativo |
+| `art_key` | string | — | — | Referencia al sprite del aliado |
+
+*Nota: los aliados no tienen `defense` ni reducción de daño. Reciben el daño completo directamente a su HP. Ver Card System GDD §4 para las reglas de campo.*
+
+---
+
 **3. Triggers (eventos que activan efectos)**
 
 | Trigger | Cuándo dispara |
@@ -151,7 +170,7 @@ Cada efecto es un dict con un campo `type` obligatorio y parámetros específico
 
 | Tipo de efecto | Parámetros | Descripción |
 |---|---|---|
-| `card_cost_modifier` | `filter: string, delta: int` | Modifica el costo de Impulso de cartas que pasen el filtro. Delta signed (-3 a +3). |
+| `card_cost_modifier` | `filter: string, delta: int` | Modifica el costo de maná de cartas que pasen el filtro. Delta signed (-3 a +3). |
 | `lock_card_type` | `filter: string` | Impide jugar cartas que pasen el filtro durante el encuentro. |
 | `bonus_damage_multiplier` | `filter: string, multiplier: float` | Multiplica el daño de cartas que pasen el filtro (1.5 = 50% más, 0.5 = 50% menos). |
 | `deal_damage` | `target: string, amount: int` | Inflige daño directo. |
@@ -160,7 +179,8 @@ Cada efecto es un dict con un campo `type` obligatorio y parámetros específico
 | `apply_status` | `target: string, status_id: string, stacks: int` | Aplica stacks del estado. |
 | `remove_status` | `target: string, status_id: string` | Elimina todos los stacks del estado. |
 | `draw_cards` | `target: string, count: int` | El target roba `count` cartas adicionales. |
-| `modify_impulso` | `target: string, delta: int` | Modifica el Impulso disponible del target este turno. |
+| `modify_mana` | `target: string, delta: int` | Modifica el maná disponible del target este turno. *(renombrado de `modify_impulso` — el recurso se llama "maná" en la mecánica de dados)* |
+| `summon_ally` | `ally_id: string` | Invoca al aliado con el ID indicado al campo. Card System emite `ally_summoned(AllyData)` al Combat System. El aliado debe existir en `allies.json`. Respeta el FIELD_LIMIT (3). *(agregado en retrofit 2026-05-17)* |
 
 Valores válidos para `target`: `player`, `enemy`, `self`, `both`.
 
@@ -223,6 +243,8 @@ Agregar un tipo de efecto nuevo requiere: (1) una entrada en esta tabla, (2) un 
 | `get_relic(id: String)` | `RelicData\|null` | |
 | `get_all_relics()` | `Array[RelicData]` | |
 | `get_relics_by_rarity(rarity: String)` | `Array[RelicData]` | |
+| `get_ally(id: String)` | `AllyData\|null` | *(agregado retrofit 2026-05-17)* |
+| `get_all_allies()` | `Array[AllyData]` | Pool completo de aliados invocables *(agregado retrofit 2026-05-17)* |
 | `is_loaded()` | `bool` | True si startup completó sin errores fatales |
 | `get_load_errors()` | `Array[String]` | Warnings y errores no-fatales |
 | `get_known_tags()` | `Array[String]` | Tags registrados |
@@ -308,7 +330,7 @@ Las reglas de validación con rangos numéricos (`cost: 0–3`, `weight: 1–100
 | Enemy System | Depende de este | Lee `EnemyData` para instanciar enemigos y su intention_pool. Interface: `get_enemy()`, `get_all_enemies()`, `get_all_bosses()`. |
 | Relic System | Depende de este | Lee `RelicData` para instanciar reliquias activas y su vocabulario de efectos. Interface: `get_relic()`, `get_all_relics()`, `get_relics_by_rarity()`. |
 | Deck Building System | Depende de este | Lee el pool de cartas y reliquias para construir ofertas de recompensa. Interface: `get_all_cards()`, `get_relics_by_rarity()`. |
-| Combat System | Dependencia indirecta | Opera sobre instancias de runtime creadas por Card System y Enemy System a partir de datos de este sistema. No consulta DataLoader directamente. |
+| Combat System | Depende de este | Lee `AllyData` via `get_ally(id)` cuando el Card System emite `ally_summoned(ally_id)`. El Combat System instancia el aliado a partir del `AllyData` base. *(retrofit 2026-05-17)* |
 | Node Map System | Sin dependencia directa | Los tipos de nodo del mapa son constantes de diseño, no datos cargados por DataLoader. |
 | Save System | Depende de este | Serializa y deserializa IDs de cartas, reliquias y enemigos. Al cargar un save, los IDs deben existir en DataLoader — IDs inválidos en saves producen datos corruptos. |
 | Scene Management System | Sin dependencia | No consume datos de contenido. |
@@ -324,6 +346,7 @@ Las reglas de validación con rangos numéricos (`cost: 0–3`, `weight: 1–100
 | Enemigos (sin jefes) | 6 | 3–30 | Más variedad de encuentros | Menos de 3 hace que el jugador anticipe intenciones perfectamente desde el run 2 |
 | Reliquias | 6 | 4–60 | Más combinaciones de deck building; más tiempo de diseño y balance | Menos de 4 reduce la variedad de runs significativamente |
 | Jefes | 1 | 1–5 | Más variedad de run completo | 0 jefes = sin condición de victoria del run |
+| Aliados invocables | 3–5 | 2–20 | Más diversidad de estrategias de campo | Menos de 2 hace que las cartas de invocación sean monótonas |
 | Max efectos por ítem | — | 1–8 | Situaciones más complejas; dispatcher hace más iterations | — |
 | Max intenciones por enemigo | — | 1–10 | Enemigos más impredecibles | 1 intención = enemigo completamente predecible |
 | Longitud máxima de `rule_text` | 120 chars | 60–150 | Reglas más descriptivas pero riesgo de overflow en UI a 768px | Reglas más crípticas |

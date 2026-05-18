@@ -106,7 +106,22 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: costo_efectivo
+    status: active
+    source: design/gdd/card-system.md
+    referenced_by:
+      - design/gdd/card-system.md
+      - design/gdd/situation-system.md
+    variables:
+      - costo_base
+      - mod_situacion
+      - mod_estado
+    output_range: [0, 99]
+    expression: "max(0, costo_base + sum(mod_situacion) + sum(mod_estado))"
+    notes: "Output mínimo es 0 (max() previene costos negativos). Output máximo teórico es sin límite si los modificadores son muy positivos; en la práctica rara vez supera 6."
+    added: 2026-05-17
+    revised: ""
 
 # Example:
 #
@@ -139,7 +154,58 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: hand_size
+    status: active
+    source: design/gdd/card-system.md
+    referenced_by:
+      - design/gdd/card-system.md
+    value: 4
+    unit: cards
+    added: 2026-05-17
+    revised: ""
+
+  - name: field_limit
+    status: active
+    source: design/gdd/card-system.md
+    referenced_by:
+      - design/gdd/card-system.md
+    value: 3
+    unit: allies
+    added: 2026-05-17
+    revised: ""
+
+  - name: starting_deck_size
+    status: active
+    source: design/gdd/card-system.md
+    referenced_by:
+      - design/gdd/card-system.md
+      - design/gdd/player-character-system.md
+    value: 10
+    unit: cards
+    added: 2026-05-17
+    revised: ""
+
+  - name: card_cost_range
+    status: active
+    source: design/gdd/card-system.md
+    referenced_by:
+      - design/gdd/card-system.md
+      - design/gdd/data-configuration-system.md
+    value: "0-3"
+    unit: mana
+    added: 2026-05-17
+    revised: ""
+
+  - name: hp_base
+    status: active
+    source: design/gdd/player-character-system.md
+    referenced_by:
+      - design/gdd/player-character-system.md
+    value: 40
+    unit: hp
+    added: 2026-05-18
+    revised: ""
 
 # Example:
 #
