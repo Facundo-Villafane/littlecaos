@@ -45,6 +45,20 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
 
+## Documentation Site
+
+El sitio de documentación está self-contained en `website/` dentro de este repo.
+
+- **Remote**: `https://github.com/Facundo-Villafane/littlecaos.git`
+- **URL publicado**: `https://facundo-villafane.github.io/littlecaos/`
+- **Deploy**: automático en push a `main` si cambia `design/**` o `website/**`
+- **Docs source**: `website/docusaurus.config.js` lee desde `../design` directamente
+- **Sidebar**: editar `website/sidebars.js` para agregar nuevos GDDs
+- **Push**: `git push origin main` — no hay pasos manuales de sync
+
+> **Importante**: `markdown: { format: 'detect' }` en el config es necesario para que
+> expresiones tipo `<1s` en los docs no rompan el build de MDX.
+
 ## Coding Standards
 
 @.claude/docs/coding-standards.md
