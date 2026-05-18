@@ -20,11 +20,10 @@ const config = {
 
   onBrokenLinks: 'warn',
 
+  onBrokenMarkdownLinks: 'warn',
+
   markdown: {
-    hooks: {
-      onBrokenMarkdownLinks: 'warn',
-      onBrokenMarkdownImages: 'warn',
-    },
+    format: 'detect',
   },
 
   i18n: {
