@@ -1,0 +1,53 @@
+/* Dorado Caos — paleta del art bible de Caos en Mano */
+:root {
+  --ifm-color-primary: #c49018;
+  --ifm-color-primary-dark: #b08215;
+  --ifm-color-primary-darker: #a67b14;
+  --ifm-color-primary-darkest: #896510;
+  --ifm-color-primary-light: #d89e1b;
+  --ifm-color-primary-lighter: #dea31f;
+  --ifm-color-primary-lightest: #e8b435;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #F2B71F;
+  --ifm-color-primary-dark: #daa41b;
+  --ifm-color-primary-darker: #ce9c1a;
+  --ifm-color-primary-darkest: #a98015;
+  --ifm-color-primary-light: #f4bf3a;
+  --ifm-color-primary-lighter: #f5c446;
+  --ifm-color-primary-lightest: #f8d06d;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Code blocks — monospace con soporte Unicode para tablas */
+pre, pre code, .prism-code, code {
+  font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Courier New', monospace !important;
+}
+
+pre {
+  white-space: pre !important;
+  overflow-x: auto;
+}
+
+:not(pre) > code {
+  white-space: nowrap;
+}
+
+.heroBanner {
+  padding: 6rem 0;
+  text-align: center;
+}
+
+.heroBanner h1 {
+  font-size: 3rem;
+}
+
+.heroBanner p {
+  font-size: 1.2rem;
+  max-width: 500px;
+  margin: 1rem auto 2rem;
+  opacity: 0.8;
+}

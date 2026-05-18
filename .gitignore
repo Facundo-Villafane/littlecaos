@@ -1,5 +1,7 @@
-# === Docusaurus docs site (separate git repo → littlecaos) ===
-website/
+# === Docusaurus (built-in website/) ===
+website/node_modules/
+website/build/
+website/.docusaurus/
 
 # === IDE and Editor ===
 .vs/
