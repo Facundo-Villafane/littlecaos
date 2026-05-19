@@ -37,7 +37,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
 version: 1
-last_updated: ""
+last_updated: "2026-05-18"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -48,7 +48,91 @@ last_updated: ""
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: el_caballero_confiado
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: easy
+    hp: 18
+    intention_pool_size: 4
+    bit: "Tiene un discurso preparado. No lo callará por nada del mundo."
+    added: 2026-05-18
+    revised: ""
+
+  - name: el_burocrata
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: easy
+    hp: 16
+    intention_pool_size: 4
+    bit: "Tiene formularios. Tiene sellos. Tiene un proceso."
+    added: 2026-05-18
+    revised: ""
+
+  - name: la_bruja_indignada
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: medium
+    hp: 26
+    intention_pool_size: 4
+    bit: "Hay protocolos para esto. Que se respeten."
+    added: 2026-05-18
+    revised: ""
+
+  - name: el_guardia_timido
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: medium
+    hp: 24
+    intention_pool_size: 4
+    bit: "Tiene el trabajo. No tiene las ganas. Ni el entrenamiento."
+    added: 2026-05-18
+    revised: ""
+
+  - name: el_juglar_perturbado
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: medium
+    hp: 26
+    intention_pool_size: 4
+    bit: "Hace malabares. Nadie se lo pidió. El número no termina nunca."
+    added: 2026-05-18
+    revised: ""
+
+  - name: el_ogro_diplomatico
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: hard
+    hp: 40
+    intention_pool_size: 4
+    bit: "Comprometido con resolver esto amigablemente."
+    added: 2026-05-18
+    revised: ""
+
+  - name: el_gran_inquisidor_del_formulario_correcto
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    difficulty_tier: boss
+    hp: 60
+    phase_threshold: 30
+    phases: 2
+    bit: "Este encuentro debe procesarse correctamente."
+    added: 2026-05-18
+    revised: ""
 
 # Example (remove when first real entry is added):
 #
@@ -113,6 +197,7 @@ formulas:
     referenced_by:
       - design/gdd/card-system.md
       - design/gdd/situation-system.md
+      - design/gdd/status-effect-system.md
     variables:
       - costo_base
       - mod_situacion
@@ -197,15 +282,61 @@ constants:
     added: 2026-05-17
     revised: ""
 
+  - name: enemy_hp_easy
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    value: "14-20"
+    unit: hp
+    notes: "Sweet spot 16-18. Balance model: player DPT 4-6, target 3-4 turns to kill."
+    added: 2026-05-18
+    revised: ""
+
+  - name: enemy_hp_medium
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    value: "24-32"
+    unit: hp
+    notes: "Sweet spot 24-26. Balance model: player DPT 5-9, target 4-5 turns to kill."
+    added: 2026-05-18
+    revised: ""
+
+  - name: enemy_hp_hard
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    value: "36-48"
+    unit: hp
+    notes: "MVP value 40. Balance model: player DPT 6-11, target 5-6 turns to kill."
+    added: 2026-05-18
+    revised: ""
+
+  - name: enemy_hp_boss
+    status: active
+    source: design/gdd/enemy-system.md
+    referenced_by:
+      - design/gdd/enemy-system.md
+    value: 60
+    unit: hp
+    notes: "Phase 2 threshold at 30 HP (50%). Balance model: player arrives with ~23 HP at HP_BASE=60."
+    added: 2026-05-18
+    revised: ""
+
   - name: hp_base
     status: active
     source: design/gdd/player-character-system.md
     referenced_by:
       - design/gdd/player-character-system.md
-    value: 40
+      - design/gdd/enemy-system.md
+    value: 60
     unit: hp
     added: 2026-05-18
-    revised: ""
+    revised: "2026-05-18"
+    notes: "Raised from 40 to 60 — run balance math showed 40 HP was insufficient for a 5-encounter run before the boss. Enemy System GDD §Formulas documents the balance model."
 
 # Example:
 #

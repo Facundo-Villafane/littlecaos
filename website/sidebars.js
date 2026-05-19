@@ -27,6 +27,7 @@ const sidebars = {
         'gdd/status-effect-system',
         'gdd/situation-system',
         'gdd/player-character-system',
+        'gdd/enemy-system',
       ],
     },
     // Agregar nuevos GDDs acá a medida que se vayan creando

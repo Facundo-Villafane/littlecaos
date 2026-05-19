@@ -90,29 +90,34 @@ Cada carpeta contiene un único archivo JSON con un array de todas las definicio
 | `flavor_text` | string | — | — | Texto narrativo |
 | `art_key` | string | — | — | Asset de fondo o superposición |
 
-**Enemigo (`EnemyData`)**
+**Enemigo (`EnemyData`)** *(esquema actualizado 2026-05-18 — alineado con Enemy System GDD)*
 
 | Campo | Tipo | Req | Valores válidos | Descripción |
 |---|---|---|---|---|
 | `id` | string | ✓ | snake_case único | Clave primaria |
 | `name` | string | ✓ | — | Nombre mostrado |
-| `max_hp` | int | ✓ | 1–999 | HP máximo y HP inicial |
-| `is_boss` | bool | ✓ | — | Distingue jefes de enemigos estándar |
-| `intention_pool` | array[dict] | ✓ | ver sub-esquema | Lista de intenciones posibles |
-| `status_immunities` | array[string] | — | status IDs conocidos | Estados que este enemigo no puede recibir |
-| `flavor_text` | string | — | — | Descripción en panel de info |
-| `art_key` | string | — | — | Referencia a sprite |
+| `hp` | int | ✓ | Easy: 14–20, Medium: 24–32, Hard: 36–48, Boss: 50–90 | HP máximo y HP inicial (ver Enemy System GDD §Tuning Knobs) |
+| `difficulty_tier` | string | ✓ | `"easy"` \| `"medium"` \| `"hard"` \| `"boss"` | Tier del enemigo; reemplaza `is_boss: bool`. `DataLoader.get_all_bosses()` filtra por `difficulty_tier == "boss"` |
+| `intention_pool` | array[dict] | ✓ | ver sub-esquema | Lista de intenciones posibles (boss: script scripted, no random) |
+| `status_immunities` | array[string] | — | status IDs conocidos | Estados que este enemigo no puede recibir en este encuentro (usado por `EnemyState.is_immune_to()`) |
+| `flavor_text` | string | — | — | 1-línea del "bit" del enemigo — mostrado al inicio del encuentro |
+| `art_archetype` | string | — | — | Clave de arquetipo visual (art bible) — referenciado por el sistema de arte |
+| `exposed_properties` | array[string] | — | — | Propiedades que las Situaciones pueden leer/modificar. Default: `["hp", "current_intention_type", "active_statuses"]` |
 
-Sub-esquema de intención:
+Sub-esquema de `IntentionData`:
 
 | Campo | Tipo | Req | Valores válidos | Descripción |
 |---|---|---|---|---|
 | `id` | string | ✓ | único dentro del enemigo | Identifica esta intención |
-| `label` | string | ✓ | ≤ 40 chars | Texto visible para el jugador — DEBE describir el efecto exactamente |
-| `icon` | string | ✓ | `attack`, `defend`, `buff`, `debuff`, `special` | Categoría de ícono en UI |
-| `effects` | array[dict] | ✓ | ver vocabulario §4 | Lo que ocurre al resolver esta intención |
-| `weight` | int | ✓ | 1–100 | Peso probabilístico para selección aleatoria |
-| `condition` | dict | — | ver condiciones §5 | Si presente, intención solo entra al pool cuando la condición es verdadera |
+| `display_name` | string | ✓ | — | Texto visible para el jugador en el panel de telegráfico |
+| `flavor_text` | string | — | — | 1-línea narrativa mostrada como tooltip del bit |
+| `type` | string | ✓ | `direct_attack` \| `status_attack` \| `buff_self` \| `posture` \| `multi_hit` | Tipo de intención (ver Enemy System GDD §Intention Type Taxonomy) |
+| `tags` | array[string] | — | `["direct_attack"]` | Tags de comportamiento. Las intenciones con `[direct_attack]` son bloqueadas por Sospechoso |
+| `damage` | int | ✓ | 0–16 | Daño fijo declarado. 0 para intenciones no dañinas. **No es un 2d6 — es valor fijo** |
+| `hit_count` | int | — | 2–4 | Solo para `type: "multi_hit"`. Cantidad de instancias. `damage` es el total; cada instancia = `damage / hit_count` |
+| `status_applied` | array[dict] | — | — | Estados que aplica al resolver. Sub-campos: `target` ("player"\|"self"), `status_id` (status ID conocido), `stacks` (int) |
+| `weight` | int | ✓ | 1–10 | Peso ponderado para selección aleatoria (regular enemies only). Boss ignora este campo |
+| `disabled_when` | array[string] | — | status IDs conocidos | Status IDs que deshabilitan esta intención. Ej: `["sospechoso"]` para intenciones `[direct_attack]` |
 
 **Reliquia (`RelicData`)**
 
@@ -238,8 +243,8 @@ Agregar un tipo de efecto nuevo requiere: (1) una entrada en esta tabla, (2) un 
 | `get_all_situations()` | `Array[SituationData]` | |
 | `get_situations_by_tipo(tipo: String)` | `Array[SituationData]` | Filtra por `absurda` o `peligrosa` |
 | `get_enemy(id: String)` | `EnemyData\|null` | |
-| `get_all_enemies()` | `Array[EnemyData]` | Solo `is_boss: false` |
-| `get_all_bosses()` | `Array[EnemyData]` | Solo `is_boss: true` |
+| `get_all_enemies()` | `Array[EnemyData]` | Solo `difficulty_tier != "boss"` |
+| `get_all_bosses()` | `Array[EnemyData]` | Solo `difficulty_tier == "boss"` |
 | `get_relic(id: String)` | `RelicData\|null` | |
 | `get_all_relics()` | `Array[RelicData]` | |
 | `get_relics_by_rarity(rarity: String)` | `Array[RelicData]` | |

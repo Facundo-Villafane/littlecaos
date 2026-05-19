@@ -8,7 +8,7 @@ description: El Improvisador — stats, HP, mazo inicial, y la mecánica de Idea
 
 > **Status**: In Design
 > **Author**: Facundo Villafane + Claude Code
-> **Last Updated**: 2026-05-18
+> **Last Updated**: 2026-05-18 *(HP_BASE revised 40→60 by Enemy System GDD balance model)*
 > **Implements Pillar**: Caos como Oportunidad · Caos Ordenado
 
 ## Overview
@@ -37,7 +37,7 @@ Si el sistema falla en entregar esto, Idea Brillante se convierte en un contador
 
 El Improvisador tiene exactamente tres propiedades en MVP:
 
-- **`hp_actual`**: HP corriente durante el run. Inicia en `HP_BASE` (40) al comenzar un run nuevo. Persiste entre encuentros — no se resetea entre combates.
+- **`hp_actual`**: HP corriente durante el run. Inicia en `HP_BASE` (60) al comenzar un run nuevo. Persiste entre encuentros — no se resetea entre combates.
 - **`deck_inicial`**: Lista de 10 IDs de carta cargada desde `player_characters.json` via DataLoader. Define el mazo con el que el jugador empieza cada run. No cambia a lo largo del run (las modificaciones de mazo son del Deck Building System).
 - **`ib_counter`**: Contador entero de Idea Brillante. Inicia en 0 al comienzo de cada encuentro. Se resetea a 0 al final de cada encuentro (no persiste entre combates).
 
@@ -83,7 +83,7 @@ No hay overhealing — HP nunca supera `HP_BASE`. La curación viene exclusivame
 
 Al iniciar un run nuevo, el Player Character System lee `PlayerCharacterData` del DataLoader:
 - `id: "el_improvisador"`
-- `hp_base: 40`
+- `hp_base: 60`
 - `starting_deck: Array[String]` — lista de 10 IDs de carta del mazo inicial
 
 Los valores en datos son la fuente de verdad. Los constantes de código (`HP_BASE`, `IB_UMBRAL`, `IB_CARDS_POR_DISPARO`) son su versión runtime.
@@ -171,7 +171,7 @@ cartas_robadas  = disparos × IB_CARDS_POR_DISPARO
 | Variable | Tipo | Rango | Descripción |
 |---|---|---|---|
 | `hp_actual` | int | 0–`HP_BASE` | HP antes del golpe |
-| `HP_BASE` | int const | 40 | HP máximo; valor inicial al comenzar el run |
+| `HP_BASE` | int const | 60 | HP máximo; valor inicial al comenzar el run |
 | `daño_a_hp` | int | 0–12 | Daño neto tras absorción de maná (definido en Card System GDD) |
 | `hp_actual_new` | int | 0–`HP_BASE` | HP resultante |
 
@@ -211,7 +211,7 @@ Se evalúa exactamente una vez, inmediatamente después de aplicar Fórmula 3. S
 
 - **Si el Card System intenta robar cartas por IB pero el mazo Y el descarte están vacíos**: Sigue las reglas del ciclo de mazo del Card System — no hay error, el jugador roba lo disponible (puede ser 0). El disparo de IB fue correcto; el robo incompleto es comportamiento válido definido en Card System GDD.
 
-- **Si `heal(amount)` es llamado con HP ya en `HP_BASE`**: `min(40, 40 + amount) = 40`. HP no cambia. La señal `hp_changed` no se emite si el valor no varió.
+- **Si `heal(amount)` es llamado con HP ya en `HP_BASE`**: `min(60, 60 + amount) = 60`. HP no cambia. La señal `hp_changed` no se emite si el valor no varió.
 
 - **Si `take_damage(0)` es llamado**: `max(0, hp - 0) = hp`. HP no cambia. `player_died` no se emite. El Combat System debería evitar llamadas con damage = 0.
 
@@ -236,7 +236,7 @@ Se evalúa exactamente una vez, inmediatamente después de aplicar Fórmula 3. S
 
 | Parámetro | Valor MVP | Rango seguro | Efecto si aumenta | Efecto si disminuye |
 |---|---|---|---|---|
-| `HP_BASE` | 40 | 20–60 | El jugador aguanta más encuentros con daño acumulado — menos tensión por resource management | El jugador muere antes de llegar al jefe — mayor presión, posiblemente frustrante en runs iniciales |
+| `HP_BASE` | 60 | 30–80 | El jugador aguanta más encuentros con daño acumulado — menos tensión por resource management | El jugador muere antes de llegar al jefe — mayor presión, posiblemente frustrante en runs iniciales |
 | `IB_UMBRAL` | 5 | 3–10 | IB se dispara con menos frecuencia — momentos más raros y épicos | IB se dispara casi en cada estado negativo — pierde el peso del "EUREKA" |
 | `IB_CARDS_POR_DISPARO` | 2 | 1–3 | Más cartas por disparo — IB más explosiva, mayor varianza | 1 carta — más sutil; 3+ cartas — demasiado disruptivo para el balance de mano |
 | Mazo inicial (cantidad) | 10 | 8–12 | Ver `starting_deck_size` en Card System GDD — misma propiedad | — |
@@ -272,7 +272,7 @@ Se evalúa exactamente una vez, inmediatamente después de aplicar Fórmula 3. S
 
 Tests unitarios en `tests/unit/player-character-system/` (BLOCKING — Logic). Tests de integración para AC-08, AC-15, AC-16 en `tests/integration/player-character-system/` (BLOCKING).
 
-- **AC-01 (Init HP al run):** DADO run nuevo, CUANDO Player Character System carga desde DataLoader, ENTONCES `hp_actual = 40` e `ib_counter = 0`.
+- **AC-01 (Init HP al run):** DADO run nuevo, CUANDO Player Character System carga desde DataLoader, ENTONCES `hp_actual = 60` e `ib_counter = 0`.
 
 - **AC-02 (HP persiste entre encuentros):** DADO `hp_actual = 27` al terminar un encuentro, CUANDO `transition_completed` llega, ENTONCES `hp_actual` sigue en 27 — no se resetea.
 
@@ -296,9 +296,9 @@ Tests unitarios en `tests/unit/player-character-system/` (BLOCKING — Logic). T
 
 - **AC-12 (take_damage(0) no emite player_died):** DADO `hp_actual = 15`, CUANDO `take_damage(0)`, ENTONCES HP no cambia y `player_died` no se emite.
 
-- **AC-13 (Curación sin overhealing):** DADO `hp_actual = 30`, CUANDO `heal(15)`, ENTONCES `hp_actual = min(40, 45) = 40`.
+- **AC-13 (Curación sin overhealing):** DADO `hp_actual = 50`, CUANDO `heal(15)`, ENTONCES `hp_actual = min(60, 65) = 60`. Con `hp_actual = 30` y `heal(15)`: `min(60, 45) = 45`.
 
-- **AC-14 (Curación en HP_BASE no emite signal):** DADO `hp_actual = 40`, CUANDO `heal(5)`, ENTONCES `hp_actual = 40` y `hp_changed` no se emite.
+- **AC-14 (Curación en HP_BASE no emite signal):** DADO `hp_actual = 60`, CUANDO `heal(5)`, ENTONCES `hp_actual = 60` y `hp_changed` no se emite.
 
 - **AC-15 (Muerte tiene prioridad sobre IB):** DADO `hp_actual = 2` e `ib_counter = 3`, CUANDO en el mismo frame `take_damage(2)` y `negative_status_applied_to_player("vergüenza", 2)`, ENTONCES `player_died()` se emite y el robo de IB del mismo frame no ocurre. *(Nota: mecanismo exacto de bloqueo a definir en implementación.)*
 

@@ -253,7 +253,7 @@ Combinado en la fórmula del Card System:
 
 | Variable | Tipo | Rango | Descripción |
 |---|---|---|---|
-| `daño_base` | int | 2–12 | Resultado 2d6 del enemigo |
+| `daño_base` | int | 0–16 | Valor fijo declarado en `IntentionData.damage` — ver Enemy System GDD §Fórmula 2. **No es un 2d6.** |
 | `stacks_vergüenza_enemigo` | int | 0–3 | Stacks de Vergüenza en el enemigo |
 
 **Rango de salida:** 0 a 12.

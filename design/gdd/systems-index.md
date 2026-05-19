@@ -33,7 +33,7 @@ Game pillars: **Caos Ordenado** (ordered chaos), **Decisiones Rápidas** (10-sec
 | 4 | Status Effect System (inferred) | Core Gameplay | MVP | Designed | design/gdd/status-effect-system.md | Card System |
 | 5 | Situation System | Core Gameplay | MVP | Designed | design/gdd/situation-system.md | Card System |
 | 6 | Player Character System | Character | MVP | Designed | design/gdd/player-character-system.md | Card System, Status Effect System |
-| 7 | Enemy System | Character | MVP | Not Started | — | Status Effect System |
+| 7 | Enemy System | Character | MVP | Designed | design/gdd/enemy-system.md | Status Effect System |
 | 8 | Relic System | Progression | MVP | Not Started | — | Card System, Status Effect System |
 | 9 | Combat System | Core Gameplay | MVP | Not Started | — | Card System, Situation System, Status Effect System, Player Character System, Enemy System |
 | 10 | Deck Building System | Progression | MVP | Not Started | — | Card System, Relic System, Combat System |
@@ -146,7 +146,7 @@ One near-circular relationship to watch: Relic System and Deck Building System. 
 | Design docs started | 6 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 6 / 12 |
+| MVP systems designed | 7 / 12 |
 | Vertical Slice systems designed | 0 / 0 (no VS-exclusive systems) |
 
 ---
