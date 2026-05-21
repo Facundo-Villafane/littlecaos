@@ -34,11 +34,11 @@ Game pillars: **Caos Ordenado** (ordered chaos), **Decisiones Rápidas** (10-sec
 | 5 | Situation System | Core Gameplay | MVP | Designed | design/gdd/situation-system.md | Card System |
 | 6 | Player Character System | Character | MVP | Designed | design/gdd/player-character-system.md | Card System, Status Effect System |
 | 7 | Enemy System | Character | MVP | Designed | design/gdd/enemy-system.md | Status Effect System |
-| 8 | Relic System | Progression | MVP | Not Started | — | Card System, Status Effect System |
-| 9 | Combat System | Core Gameplay | MVP | Not Started | — | Card System, Situation System, Status Effect System, Player Character System, Enemy System |
-| 10 | Deck Building System | Progression | MVP | Not Started | — | Card System, Relic System, Combat System |
-| 11 | Node Map System | Progression | MVP | Not Started | — | Combat System |
-| 12 | Save System (inferred) | Persistence | MVP | Not Started | — | Combat System, Node Map System, Deck Building System, Player Character System |
+| 8 | Relic System | Progression | MVP | Designed | design/gdd/relic-system.md | Card System, Status Effect System |
+| 9 | Combat System | Core Gameplay | MVP | Designed | design/gdd/combat-system.md | Card System, Situation System, Status Effect System, Player Character System, Enemy System |
+| 10 | Deck Building System | Progression | MVP | Designed | design/gdd/deck-building-system.md | Card System, Relic System, Combat System |
+| 11 | Node Map System | Progression | MVP | Designed | design/gdd/node-map-system.md | Combat System |
+| 12 | Save System (inferred) | Persistence | MVP | Designed | design/gdd/save-system.md | Combat System, Node Map System, Deck Building System, Player Character System |
 
 ---
 
@@ -143,10 +143,10 @@ One near-circular relationship to watch: Relic System and Deck Building System. 
 | Metric | Count |
 |--------|-------|
 | Total systems identified | 12 |
-| Design docs started | 6 |
+| Design docs started | 12 |
 | Design docs reviewed | 0 |
 | Design docs approved | 0 |
-| MVP systems designed | 7 / 12 |
+| MVP systems designed | 12 / 12 |
 | Vertical Slice systems designed | 0 / 0 (no VS-exclusive systems) |
 
 ---

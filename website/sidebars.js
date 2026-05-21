@@ -28,6 +28,11 @@ const sidebars = {
         'gdd/situation-system',
         'gdd/player-character-system',
         'gdd/enemy-system',
+        'gdd/relic-system',
+        'gdd/combat-system',
+        'gdd/deck-building-system',
+        'gdd/node-map-system',
+        'gdd/save-system',
       ],
     },
     // Agregar nuevos GDDs acá a medida que se vayan creando

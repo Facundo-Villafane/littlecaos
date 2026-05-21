@@ -161,7 +161,90 @@ entities:
 # Attribute fields: value_gold, weight, stackable, category, and any stat
 #   modifiers that another system (e.g., economy, crafting) might reference.
 
-items: []
+items:
+  - name: sello_autenticidad
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: comun
+    trigger: on_card_played
+    trigger_filter: "amount_gte:3"
+    effect: "gain_mana: 1"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
+
+  - name: diario_martir
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: raro
+    trigger: on_status_applied
+    trigger_filter: "tag:negative, target:player"
+    effect: "restore_hp: stack_delta × 2"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
+
+  - name: campana_vergüenza
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: comun
+    trigger: on_mana_rolled
+    trigger_filter: "amount_lte:4"
+    effect: "draw_cards: 1"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
+
+  - name: contabilidad_ogro
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: raro
+    trigger: on_encounter_ended
+    trigger_filter: "outcome:victory"
+    effect: "deal_damage: 5 at next on_encounter_start (ogro_pending flag)"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
+
+  - name: amuleto_fallido
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: raro
+    trigger: on_card_discarded_unused
+    trigger_filter: "all"
+    effect: "grant_next_turn_mana: 1 (accumulated, max 3 per turn)"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
+
+  - name: formulario_exencion
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    category: relic
+    rarity: especial
+    trigger: on_damage_received
+    trigger_filter: "amount_gte:8"
+    effect: "apply_status: confianza_excesiva stacks:2 target:player"
+    charges: -1
+    added: 2026-05-19
+    revised: ""
 
 # Example:
 #
@@ -208,6 +291,110 @@ formulas:
     added: 2026-05-17
     revised: ""
 
+  - name: diario_hp_recovery
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    variables:
+      - stack_delta
+      - DIARIO_HP_PER_STACK
+    output_range: [2, 6]
+    expression: "stack_delta × DIARIO_HP_PER_STACK"
+    notes: "stack_delta = stacks negativos recibidos en un único evento on_status_applied (1–3). DIARIO_HP_PER_STACK = 2. Output capeado por HP_BASE=60 del Player Character System."
+    added: 2026-05-19
+    revised: ""
+
+  - name: amuleto_mana_bonus
+    status: active
+    source: design/gdd/relic-system.md
+    referenced_by:
+      - design/gdd/relic-system.md
+    variables:
+      - unplayed_cards
+      - AMULETO_MANA_PER_CARD
+      - AMULETO_MAX_BONUS
+    output_range: [0, 3]
+    expression: "min(unplayed_cards × AMULETO_MANA_PER_CARD, AMULETO_MAX_BONUS)"
+    notes: "unplayed_cards = cartas descartadas al fin de turno sin ser jugadas (0–4). AMULETO_MANA_PER_CARD=1, AMULETO_MAX_BONUS=3. Cap evaluado por evento, no al final del turno."
+    added: 2026-05-19
+    revised: ""
+
+  - name: offer_generation
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    variables:
+      - eligible_pool
+      - OFFER_SIZE
+      - copies_in_deck
+      - DUPLICATE_CAP
+    output_range: [0, 3]
+    expression: "sample_without_replacement(eligible_pool, OFFER_SIZE) where eligible_pool = { c ∈ card_pool | copies_in_deck(c) < DUPLICATE_CAP }"
+    notes: "output is 0–3 distinct cards. 0 means pool exhausted (add option blocked). With MVP values (pool=20, DECK_CAP=20, DUPLICATE_CAP=2), output < 3 while available_add=true is mathematically impossible."
+    added: 2026-05-20
+    revised: ""
+
+  - name: duplicate_cap_check
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    variables:
+      - copies_in_deck
+      - DUPLICATE_CAP
+    output_range: [0, 1]
+    expression: "excluded_from_offer(c) = copies_in_deck(c) >= DUPLICATE_CAP"
+    notes: "Boolean output. copies_in_deck() MUST compare by card_id (String), not object reference. Used during eligible_pool construction in offer_generation."
+    added: 2026-05-20
+    revised: ""
+
+  - name: deck_size_after
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    variables:
+      - deck_size
+      - action
+    output_range: [4, 20]
+    expression: "deck_size + Δ(action) where Δ: add_card=+1, upgrade_card=0, remove_card=-1, add_relic=0"
+    notes: "Output guaranteed in [4,20] if availability checks (Fórmula 2) are respected before allowing the action. upgrade_card and add_relic are deck-size neutral."
+    added: 2026-05-20
+    revised: ""
+
+  - name: gold_accumulated
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    variables:
+      - gold_drop_easy
+      - gold_drop_medium
+      - gold_drop_hard
+      - combat_nodes_visited
+    output_range: [0, 102]
+    expression: "Σ(gold_drop(enemy_tier_n)) for each COMBAT node visited"
+    notes: "Max in MVP: 20+32+50=102 (Easy row1 + Medium row2 + Hard row4). Min before first Market: 20 (only row1 before row2 Market). gold does not reset between runs."
+    added: 2026-05-21
+    revised: ""
+
+  - name: can_purchase_market_item
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    variables:
+      - player_gold
+      - item_price
+      - purchase_preconditions
+    output_range: [0, 1]
+    expression: "(player_gold >= item.price) AND purchase_preconditions(item)"
+    notes: "Boolean output. Preconditions: HP items require hp < HP_MAX; cards require deck_size < DECK_CAP AND copies < DUPLICATE_CAP; relics require pool available."
+    added: 2026-05-21
+    revised: ""
+
 # Example:
 #
 # formulas:
@@ -245,6 +432,7 @@ constants:
     source: design/gdd/card-system.md
     referenced_by:
       - design/gdd/card-system.md
+      - design/gdd/deck-building-system.md
     value: 4
     unit: cards
     added: 2026-05-17
@@ -266,6 +454,7 @@ constants:
     referenced_by:
       - design/gdd/card-system.md
       - design/gdd/player-character-system.md
+      - design/gdd/deck-building-system.md
     value: 10
     unit: cards
     added: 2026-05-17
@@ -332,11 +521,178 @@ constants:
     referenced_by:
       - design/gdd/player-character-system.md
       - design/gdd/enemy-system.md
+      - design/gdd/relic-system.md
+      - design/gdd/node-map-system.md
     value: 60
     unit: hp
     added: 2026-05-18
     revised: "2026-05-18"
     notes: "Raised from 40 to 60 — run balance math showed 40 HP was insufficient for a 5-encounter run before the boss. Enemy System GDD §Formulas documents the balance model."
+
+  - name: gold_drop_easy
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 20
+    unit: gold
+    notes: "Gold dropped by Easy-tier enemies. Pending: Combat System GDD must reference this when adding gold drop to enemy victory resolution."
+    added: 2026-05-21
+    revised: ""
+
+  - name: gold_drop_medium
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 32
+    unit: gold
+    notes: "Gold dropped by Medium-tier enemies. Pending: Combat System GDD must reference this."
+    added: 2026-05-21
+    revised: ""
+
+  - name: gold_drop_hard
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 50
+    unit: gold
+    notes: "Gold dropped by Hard-tier enemies (Ogro Diplomático). Pending: Combat System GDD must reference this."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_price_hp_small
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 20
+    unit: gold
+    notes: "Price of the small HP potion in Market nodes. Heals MARKET_HEAL_SMALL (15) HP."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_price_hp_large
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 35
+    unit: gold
+    notes: "Price of the large HP potion in Market nodes. Heals MARKET_HEAL_LARGE (30) HP."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_heal_small
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 15
+    unit: hp
+    notes: "HP restored by the small potion in Market nodes."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_heal_large
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 30
+    unit: hp
+    notes: "HP restored by the large potion in Market nodes."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_price_card
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 60
+    unit: gold
+    notes: "Price of each card in Market nodes. Applies duplicate cap filter (same as Deck Building reward)."
+    added: 2026-05-21
+    revised: ""
+
+  - name: market_price_relic
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 100
+    unit: gold
+    notes: "Price of each relic in Market nodes. Pool uses same available relics as Relic System."
+    added: 2026-05-21
+    revised: ""
+
+  - name: map_row_count
+    status: active
+    source: design/gdd/node-map-system.md
+    referenced_by:
+      - design/gdd/node-map-system.md
+    value: 6
+    unit: rows
+    notes: "Total rows in the run map. Structural constant — changing requires full map topology redesign."
+    added: 2026-05-21
+    revised: ""
+
+  - name: deck_cap
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    value: 20
+    unit: cards
+    notes: "Maximum deck size. If deck_size >= DECK_CAP, 'Añadir carta' is blocked. Safe range: 15–30. Interacts with DUPLICATE_CAP — see Tuning Knobs."
+    added: 2026-05-20
+    revised: ""
+
+  - name: deck_min
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    value: 4
+    unit: cards
+    notes: "Minimum functional deck size = hand_size. If deck_size <= DECK_MIN, 'Eliminar carta' is blocked. Must remain <= hand_size (Card System)."
+    added: 2026-05-20
+    revised: ""
+
+  - name: duplicate_cap
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    value: 2
+    unit: copies
+    notes: "Maximum copies of any single card (by card_id) allowed in the deck. Cards at cap are excluded from the offer pool. Safe range: 1–3."
+    added: 2026-05-20
+    revised: ""
+
+  - name: offer_size
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    value: 3
+    unit: cards
+    notes: "Number of cards presented in the 'Añadir carta' offer. UI must support 1–3 (pool may have fewer eligible cards). Safe range: 2–4."
+    added: 2026-05-20
+    revised: ""
+
+  - name: relic_offer_size
+    status: active
+    source: design/gdd/deck-building-system.md
+    referenced_by:
+      - design/gdd/deck-building-system.md
+    value: 2
+    unit: relics
+    notes: "Number of relics presented in the 'Ganar reliquia' offer. UI must support 1–2 (pool may have only 1 available). Safe range: 1–3."
+    added: 2026-05-20
+    revised: ""
 
 # Example:
 #
